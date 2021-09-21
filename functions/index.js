@@ -105,8 +105,8 @@ exports.stats = functions.https.onRequest(async (req, res) => {
     console.log("startDate - " + req.query.startDate + "; " + new Date(req.query.startDate))
   }
   const events = await admin.firestore()
-  							            .collection('miners')
-  							            .doc(miner)
+                            .collection('miners')
+                            .doc(miner)
                             .collection('unpaidDaily')
                             .where('date', '>=', startDate)
                             .where('date', '<', endDate)
@@ -175,7 +175,7 @@ async function cronMiner(miner) {
   const unpaid = minedEth(json);
 
   const snapshot = await admin.firestore()
-  								                .collection('miners')
+                                  .collection('miners')
                                   .doc(miner)
                                   .collection('unpaidDaily')
                                   .orderBy('date', 'desc')
