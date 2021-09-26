@@ -16,13 +16,5 @@ app.get(
     }
 )
 exports.api = functions.https.onRequest(app);
-
-exports.cronJob = functions.pubsub.schedule('0 10 * * *').onRun(async () => {
-    const miners = await common.db.collection('miners').get();
-    miners.forEach(async doc => {
-        console.log("Processing:" + doc.id + "; enabled=" + doc.data().enabled);
-        if (doc.data().enabled) {
-            await common.cronMiner(doc.id);
-        }
-    });
-});
+exports.cronJob = functions.pubsub.schedule('0 10 * * *')
+    .onRun(async () => { common.collectMinersData() });

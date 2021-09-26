@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const fetch = require("node-fetch");
+const admin = require("firebase-admin");
 const common = require('../common')
 
 exports.setupMiner = functions.https.onRequest(async (req, res) => {
@@ -52,7 +53,7 @@ async function setupMiner(miner, hashRate) {
     const data = {
         average: averageHashes(json),
         unpaid: minedEth(json),
-        date: common.admin.firestore.Timestamp.fromDate(new Date()),
+        date: admin.firestore.Timestamp.fromDate(new Date()),
         diff: 0
     };
     await common.db.collection('miners').doc(miner).set(

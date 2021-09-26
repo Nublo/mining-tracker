@@ -11,13 +11,26 @@ module.exports = {
         const minerDoc = await admin.firestore().collection('miners').doc(miner).get();
         return minerDoc.exists;
     },
+    collectMinersData: async function() {
+        return collectMinersData()
+    },
     cronMiner: async function(miner) {
         return cronMiner(miner);
     },
-    admin,
     db,
     web3
 };
+
+async function collectMinersData() {
+    const miners = await db.collection('miners').get();
+    miners.forEach(async doc => {
+        console.log("Processing:" + doc.id + "; enabled=" + doc.data().enabled);
+        if (doc.data().enabled) {
+            await cronMiner(doc.id);
+        }
+    });
+}
+
 async function cronMiner(miner) {
     const baseUrl = 'https://api.ethermine.org/miner/' + miner;
     const minerUrl = baseUrl + '/dashboard';
