@@ -3,10 +3,6 @@ const common = require('../common')
 
 exports.collect = functions.https.onRequest(async (req, res) => {
     let miner = req.params.miner;
-
-    if (!miner.startsWith("0x")) {
-        miner = "0x" + miner;
-    }
     const minerExistsResult = await common.isMinerExists(miner);
     if (!minerExistsResult) {
         res.status(400).send("Unknown miner - " + miner);
@@ -19,6 +15,6 @@ exports.collect = functions.https.onRequest(async (req, res) => {
         return;
     }
 
-    const result = await common.cronMiner(miner);
+    const result = await common.cronMiner(miner, minerDoc.data().provider);
     res.json(result);
 });

@@ -1,25 +1,20 @@
 const functions = require("firebase-functions");
-const fetch = require("node-fetch");
-const admin = require("firebase-admin");
 const common = require('../common')
+const providers = require('../providers')
 
 exports.setupMiner = functions.https.onRequest(async (req, res) => {
-    const validateResult = await validateMinerSetup(req.params.miner, req.query.hashRate);
+    const validateResult = await validateMinerSetup(req.params.miner, req.query.hashRate, req.query.provider);
     if (validateResult.isError) {
         res.status(400).send(validateResult.error);
         return;
     }
 
-    const result = await setupMiner(validateResult.miner, validateResult.hashRate);
+    const result = await setupMiner(validateResult.miner, validateResult.hashRate, validateResult.provider);
     res.json(result);
 });
 
-async function validateMinerSetup(miner, hashRate) {
+async function validateMinerSetup(miner, hashRate, provider) {
     const result = {};
-    if (!miner.startsWith("0x")) {
-        miner = "0x" + miner;
-    }
-
     const isAddress = common.web3.utils.isAddress(miner);
     if (!isAddress) {
         result.isError = true;
@@ -40,26 +35,31 @@ async function validateMinerSetup(miner, hashRate) {
         return result;
     }
 
+    switch (provider) {
+        case providers.providers.ETHERMINE:
+            break;
+        case providers.providers.HIVEON:
+            break;
+        default:
+            result.isError = true;
+            result.error = "Provide existing provider for setup {url}?provider="
+            return result;
+    }
+
     result.isError = false;
     result.hashRate = hashRate;
     result.miner = miner;
+    result.provider = provider;
     return result;
 }
 
-async function setupMiner(miner, hashRate) {
-    const minerUrl = 'https://api.ethermine.org/miner/' + miner + '/dashboard';
-    const json = await fetch(minerUrl, {method: "Get"}).then(response => response.json());
-
-    const data = {
-        average: averageHashes(json),
-        unpaid: minedEth(json),
-        date: admin.firestore.Timestamp.fromDate(new Date()),
-        diff: 0
-    };
+async function setupMiner(miner, hashRate, provider) {
+    const data = await providers.getMinerData(miner, provider, 0, true)
     await common.db.collection('miners').doc(miner).set(
         {
             hashRate: parseInt(hashRate),
-            enabled: true
+            enabled: true,
+            provider: provider
         }
     );
     await common.db.collection('miners').doc(miner).collection('unpaidDaily').add(data);

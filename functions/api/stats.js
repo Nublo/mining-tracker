@@ -62,7 +62,7 @@ exports.stats = functions.https.onRequest(async (req, res) => {
         }
     });
     const computationParams = {
-        MH: hashRate,
+        'MH/s' : hashRate,
         start: startDate.toDateString(),
         end: endDate.toDateString()
     };
