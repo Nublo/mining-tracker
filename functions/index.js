@@ -17,4 +17,4 @@ app.get(
 )
 exports.api = functions.https.onRequest(app);
 exports.cronJob = functions.pubsub.schedule('0 10 * * *')
-    .onRun(async () => { common.collectMinersData() });
+    .onRun(async () => { await common.collectMinersData() });

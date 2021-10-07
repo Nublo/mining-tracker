@@ -9,7 +9,7 @@ module.exports = {
         return minerDoc.exists;
     },
     collectMinersData: async function() {
-        return collectMinersData()
+        await collectMinersData();
     },
     cronMiner: async function(miner, provider) {
         return cronMiner(miner, provider);
