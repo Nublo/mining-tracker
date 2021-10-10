@@ -93,7 +93,7 @@ function averageHashRateEthemine(json) {
 
 async function getHiveonData(apiUrl, previousUnpaid, isSetup) {
     const json = await fetch(apiUrl.minerUrl, { method: "Get" }).then(response => response.json());
-    const average = parseInt(json.reportedHashrate24h) / 1000000;
+    const average = parseInt(json.hashrate24h) / 1000000;
 
     const unpaidJson = await fetch(apiUrl.payoutsUrl, {method:"Get"}).then(response => response.json());
     const unpaid = unpaidJson.totalUnpaid;
