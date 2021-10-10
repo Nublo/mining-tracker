@@ -17,4 +17,5 @@ app.get(
 )
 exports.api = functions.https.onRequest(app);
 exports.cronJob = functions.pubsub.schedule('0 10 * * *')
+    .retryConfig({retryCount: 3})
     .onRun(async () => { await common.collectMinersData() });
