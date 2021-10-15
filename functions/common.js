@@ -56,9 +56,7 @@ async function cronMiner(miner, provider) {
     await db.runTransaction(async (_) => {
         const minerRef = db.collection('miners').doc(miner);
         await minerRef.collection('unpaidDaily').add(data);
-        await updateDoc(minerRef, {
-            lastUpdate: admin.firestore.Timestamp.fromDate(new Date())
-        });
+        await minerRef.update({lastUpdate: admin.firestore.Timestamp.fromDate(new Date())});
     });
     return data;
 }
