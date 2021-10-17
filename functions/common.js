@@ -4,6 +4,10 @@ const providers = require('./providers')
 const admin = require("firebase-admin");
 const db = providers.admin.firestore();
 
+const functions = require("firebase-functions");
+const { Telegraf } = require('telegraf')
+const bot = new Telegraf(functions.config().config.bot_id)
+
 module.exports = {
     isMinerExists: async function (miner) {
         const minerDoc = await db.collection('miners').doc(miner).get();
@@ -51,12 +55,27 @@ async function cronMiner(miner, provider) {
         .limit(1)
         .get();
     const previousUnpaid = snapshot.docs[0].data().unpaid;
-    const data = await providers.getMinerData(miner, provider, previousUnpaid, false)
+    try {
+        const data = await providers.getMinerData(miner, provider, previousUnpaid, false)
+        await db.runTransaction(async (_) => {
+            const minerRef = db.collection('miners').doc(miner);
+            await minerRef.collection('unpaidDaily').add(data);
+            await minerRef.update({lastUpdate: admin.firestore.Timestamp.fromDate(new Date())});
+        });
+        return data;
+    } catch (error) {
+        console.log(error);
+        sendErrorInfo(error, miner);
+    }
+}
 
-    await db.runTransaction(async (_) => {
-        const minerRef = db.collection('miners').doc(miner);
-        await minerRef.collection('unpaidDaily').add(data);
-        await minerRef.update({lastUpdate: admin.firestore.Timestamp.fromDate(new Date())});
-    });
-    return data;
+function sendErrorInfo(error, miner) {
+    const recollectLink = 'https://us-central1-miningtrackergroup.cloudfunctions.net/api/collect/' + miner; // TODO hardcoded to specific deployemnt
+    const chatId = functions.config().config.chat_id;
+    bot.telegram.sendMessage(chatId, "MiningTrackerGroup - " + error.message);
+    bot.telegram.sendMessage(
+        chatId,
+        "Retry for <a href=\"" + recollectLink + "\">" + miner + "</a>",
+        {"parse_mode": "HTML"}
+    )
 }
