@@ -25,16 +25,12 @@ module.exports = {
 
 async function collectMinersData() {
     const miners = await db.collection('miners').get();
-    const now = new Date();
-    now.setHours(0,0,0,0)
-
+    const updateMiners = [];
     miners.forEach(async doc => {
         const lastUpdate = doc.data().lastUpdate.toDate();
-        lastUpdate.setHours(0,0,0,0);
-
-        const isEnabled = doc.data().enabled && lastUpdate.getTime() < now.getTime();
+        const isEnabled = doc.data().enabled && isBeforeToday(lastUpdate);
         if (isEnabled) {
-            await cronMiner(doc.id, doc.data().provider);
+            updateMiners.push(cronMiner(doc.id, doc.data().provider))
         }
         console.log(
             doc.id +
@@ -44,6 +40,14 @@ async function collectMinersData() {
             "; isEnabled=" + isEnabled
         );
     });
+    await Promise.all(updateMiners);
+}
+
+function isBeforeToday(before) {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    before.setHours(0,0,0,0);
+    return before.getTime() < now.getTime();
 }
 
 async function cronMiner(miner, provider) {
