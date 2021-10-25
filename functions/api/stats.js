@@ -49,6 +49,7 @@ exports.stats = functions.https.onRequest(async (req, res) => {
         .get();
     const stats = [];
     let missed = 0;
+    let overmined = 0;
     events.forEach((doc) => {
         const entry = {};
         entry.date = doc.data().date.toDate().toDateString();
@@ -58,7 +59,10 @@ exports.stats = functions.https.onRequest(async (req, res) => {
         stats.push(entry);
 
         if (entry.average && entry.diff && entry.average < hashRate) {
-            missed += entry.diff * (1 - (entry.average / hashRate));
+            missed += entry.diff * ((1/entry.average)*hashRate - 1);
+        }
+        if (entry.average && entry.diff && entry.average > hashRate) {
+            overmined += entry.diff * (1 - (1/entry.average)*hashRate);
         }
     });
     const computationParams = {
@@ -69,8 +73,8 @@ exports.stats = functions.https.onRequest(async (req, res) => {
     const jsonAnswer = {};
     jsonAnswer.computationParams = computationParams;
     jsonAnswer.missed = {
-        total: missed,
-        half: missed / 2
+        missed: missed,
+        overmined: overmined
     };
     jsonAnswer.stats = stats;
     res.set('Cache-Control', 'public, max-age=1800, s-maxage=1800');
