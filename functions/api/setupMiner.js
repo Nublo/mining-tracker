@@ -59,7 +59,8 @@ async function setupMiner(miner, hashRate, provider) {
         {
             hashRate: parseInt(hashRate),
             enabled: true,
-            provider: provider
+            provider: provider,
+            lastUpdate: providers.admin.firestore.Timestamp.fromDate(new Date())
         }
     );
     await common.db.collection('miners').doc(miner).collection('unpaidDaily').add(data);
