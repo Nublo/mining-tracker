@@ -40,8 +40,9 @@ async function collectMinersData() {
                 "; lastUpdate=" + lastUpdate.toDateString() +
                 "; isEnabled=" + isEnabled
             );
-        } catch (e) {
-            console.log(e.message)
+        } catch (error) {
+            console.log(error);
+            sendErrorInfo(error, doc.id, false);
         }
     });
     await Promise.all(updateMiners);
@@ -73,17 +74,19 @@ async function cronMiner(miner, provider) {
         return data;
     } catch (error) {
         console.log(error);
-        sendErrorInfo(error, miner);
+        sendErrorInfo(error, miner, true);
     }
 }
 
-function sendErrorInfo(error, miner) {
-    const recollectLink = 'https://us-central1-miningtrackergroup.cloudfunctions.net/api/collect/' + miner; // TODO hardcoded to specific deployemnt
+function sendErrorInfo(error, miner, withRetry) {
     const chatId = functions.config().config.chat_id;
     bot.telegram.sendMessage(chatId, "MiningTrackerGroup - " + error.message);
-    bot.telegram.sendMessage(
-        chatId,
-        "Retry for <a href=\"" + recollectLink + "\">" + miner + "</a>",
-        {"parse_mode": "HTML"}
-    )
+    if (withRetry) {
+        const retryLink = 'https://us-central1-miningtrackergroup.cloudfunctions.net/api/collect/' + miner; // TODO hardcoded to specific deployemnt
+        bot.telegram.sendMessage(
+            chatId,
+            "Retry for <a href=\"" + retryLink + "\">" + miner + "</a>",
+            {"parse_mode": "HTML"}
+        )
+    }
 }
