@@ -27,18 +27,22 @@ async function collectMinersData() {
     const miners = await db.collection('miners').get();
     const updateMiners = [];
     miners.forEach(async doc => {
-        const lastUpdate = doc.data().lastUpdate.toDate();
-        const isEnabled = doc.data().enabled && isBeforeToday(lastUpdate);
-        if (isEnabled) {
-            updateMiners.push(cronMiner(doc.id, doc.data().provider))
+        try {
+            const lastUpdate = doc.data().lastUpdate.toDate();
+            const isEnabled = doc.data().enabled && isBeforeToday(lastUpdate);
+            if (isEnabled) {
+                updateMiners.push(cronMiner(doc.id, doc.data().provider))
+            }
+            console.log(
+                doc.id +
+                "; enabled=" + doc.data().enabled +
+                "; provider=" + doc.data().provider +
+                "; lastUpdate=" + lastUpdate.toDateString() +
+                "; isEnabled=" + isEnabled
+            );
+        } catch (e) {
+            console.log(e.message)
         }
-        console.log(
-            doc.id +
-            "; enabled=" + doc.data().enabled +
-            "; provider=" + doc.data().provider +
-            "; lastUpdate=" + lastUpdate.toDateString() +
-            "; isEnabled=" + isEnabled
-        );
     });
     await Promise.all(updateMiners);
 }
