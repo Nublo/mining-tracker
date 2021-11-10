@@ -16,8 +16,8 @@ module.exports = {
     collectMinersData: async function() {
         await collectMinersData();
     },
-    cronMiner: async function(miner, provider) {
-        return cronMiner(miner, provider);
+    cronMiner: async function(miner, provider, channelId) {
+        return cronMiner(miner, provider, channelId);
     },
     db,
     web3
@@ -31,7 +31,13 @@ async function collectMinersData() {
             const lastUpdate = doc.data().lastUpdate.toDate();
             const isEnabled = doc.data().enabled && isBeforeToday(lastUpdate);
             if (isEnabled) {
-                updateMiners.push(cronMiner(doc.id, doc.data().provider))
+                updateMiners.push(
+                    cronMiner(
+                        doc.id,
+                        doc.data().provider,
+                        doc.data().channelId
+                    )
+                )
             }
             console.log(
                 doc.id +
@@ -55,7 +61,7 @@ function isBeforeToday(before) {
     return before.getTime() < now.getTime();
 }
 
-async function cronMiner(miner, provider) {
+async function cronMiner(miner, provider, channelId) {
     const snapshot = await db
         .collection('miners')
         .doc(miner)
@@ -71,11 +77,25 @@ async function cronMiner(miner, provider) {
             await minerRef.collection('unpaidDaily').add(data);
             await minerRef.update({lastUpdate: admin.firestore.Timestamp.fromDate(new Date())});
         });
+        if (channelId) {
+            reportCollectedData(data, miner, channelId)
+        }
         return data;
     } catch (error) {
         console.log(error);
         sendErrorInfo(error, miner, true);
     }
+}
+
+function reportCollectedData(data, miner, channelId) {
+    bot.telegram.sendMessage(channelId,
+        miner +
+        "\n{" +
+        "\n  averageHashRate=" + data.average + "," +
+        "\n  maxStale=" + data.staleMax +
+        "\n  averageStale=" + data.staleAverage +
+        "\n}"
+    );
 }
 
 function sendErrorInfo(error, miner, withRetry) {

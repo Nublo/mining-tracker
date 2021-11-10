@@ -15,6 +15,10 @@ exports.collect = functions.https.onRequest(async (req, res) => {
         return;
     }
 
-    const result = await common.cronMiner(miner, minerDoc.data().provider);
+    const result = await common.cronMiner(
+        miner,
+        minerDoc.data().provider,
+        minerDoc.data().channelId
+    );
     res.json(result);
 });

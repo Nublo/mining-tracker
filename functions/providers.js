@@ -70,11 +70,23 @@ async function getEtherMineData(apiUrl, previousUnpaid, isSetup) {
         diff = unpaid + (latestPayout - previousUnpaid);
     }
 
+    let staleShares = 0;
+    let validShares = 0;
+    let maxStale = 0;
+
+    for (let i = 0; i < json.data.statistics.length; i++) {
+        staleShares += json.data.statistics[i].staleShares;
+        validShares += json.data.statistics[i].validShares;
+        maxStale = Math.max(maxStale, json.data.statistics[i].staleShares)
+    }
+
     return {
         average: averageHashRateEthemine(json),
         unpaid: unpaid,
         date: admin.firestore.Timestamp.fromDate(new Date()),
-        diff: diff
+        diff: diff,
+        staleMax: maxStale,
+        staleAverage: staleShares / validShares
     };
 }
 
@@ -112,6 +124,8 @@ async function getHiveonData(apiUrl, previousUnpaid, isSetup) {
         average: average,
         unpaid: unpaid,
         date: admin.firestore.Timestamp.fromDate(new Date()),
-        diff: diff
+        diff: diff,
+        staleMax: -1,
+        staleAverage: -1
     };
 }
