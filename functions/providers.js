@@ -92,13 +92,13 @@ async function getEtherMineData(apiUrl, previousUnpaid, isSetup) {
 
 /**
  * @param {Object[]} json.data.statistics - holds current miner stats
- * @param {number} json.data.statistics[].currentHashrate - reported miner hashRate
+ * @param {number} json.data.statistics[].reportedHashrate - reported miner hashRate
  */
 function averageHashRateEthemine(json) {
     const stats = json.data.statistics;
     let average = 0;
     for (let i = 0; i < stats.length; i++) {
-        average += (stats[i].currentHashrate / 1000000);
+        average += (stats[i].reportedHashrate / 1000000);
     }
     return average / stats.length;
 }
