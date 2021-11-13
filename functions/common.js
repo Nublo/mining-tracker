@@ -93,7 +93,7 @@ function reportCollectedData(data, miner, channelId) {
         "\n{" +
         "\n  averageHashRate=" + data.average + "," +
         "\n  maxStale=" + data.staleMax +
-        "\n  averageStale=" + data.staleAverage +
+        "\n  averageStale=" + data.staleAverage + "%" +
         "\n}"
     );
 }

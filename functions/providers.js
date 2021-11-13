@@ -86,7 +86,7 @@ async function getEtherMineData(apiUrl, previousUnpaid, isSetup) {
         date: admin.firestore.Timestamp.fromDate(new Date()),
         diff: diff,
         staleMax: maxStale,
-        staleAverage: staleShares / validShares
+        staleAverage: Number((staleShares / validShares) * 100).toFixed(2)
     };
 }
 
