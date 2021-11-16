@@ -85,8 +85,8 @@ async function getEtherMineData(apiUrl, previousUnpaid, isSetup) {
         unpaid: unpaid,
         date: admin.firestore.Timestamp.fromDate(new Date()),
         diff: diff,
-        staleMax: maxStale,
-        staleAverage: Number((staleShares / validShares) * 100).toFixed(2)
+        maxStale: maxStale,
+        staleAverage: Number(staleShares / validShares)
     };
 }
 
@@ -125,7 +125,7 @@ async function getHiveonData(apiUrl, previousUnpaid, isSetup) {
         unpaid: unpaid,
         date: admin.firestore.Timestamp.fromDate(new Date()),
         diff: diff,
-        staleMax: -1,
+        maxStale: -1,
         staleAverage: -1
     };
 }

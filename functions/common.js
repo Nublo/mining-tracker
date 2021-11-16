@@ -88,13 +88,14 @@ async function cronMiner(miner, provider, channelId) {
 }
 
 function reportCollectedData(data, miner, channelId) {
-    bot.telegram.sendMessage(channelId,
-        miner +
-        "\n{" +
-        "\n  averageHashRate=" + data.average + "," +
-        "\n  maxStale=" + data.staleMax +
-        "\n  averageStale=" + data.staleAverage + "%" +
-        "\n}"
+    const copyData = {};
+    copyData.averageHashRate = Number(data.average.toFixed(2));
+    copyData.maxStale = data.maxStale;
+    copyData.averageStale = Number((data.staleAverage * 100).toFixed(2));
+    bot.telegram.sendMessage(
+        channelId,
+        miner + "\n```\n" + JSON.stringify(copyData, null, 2) + "\n```",
+        { parse_mode: 'MarkdownV2' }
     );
 }
 
