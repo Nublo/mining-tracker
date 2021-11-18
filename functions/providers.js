@@ -77,7 +77,7 @@ async function getEtherMineData(apiUrl, previousUnpaid, isSetup) {
     for (let i = 0; i < json.data.statistics.length; i++) {
         staleShares += json.data.statistics[i].staleShares;
         validShares += json.data.statistics[i].validShares;
-        maxStale = Math.max(maxStale, json.data.statistics[i].staleShares)
+        maxStale = Math.max(maxStale, json.data.statistics[i].staleShares / validShares)
     }
 
     return {

@@ -90,7 +90,7 @@ async function cronMiner(miner, provider, channelId) {
 function reportCollectedData(data, miner, channelId) {
     const copyData = {};
     copyData.averageHashRate = Number(data.average.toFixed(2));
-    copyData.maxStale = data.maxStale;
+    copyData.maxStale = Number((data.maxStale * 100).toFixed(2));
     copyData.averageStale = Number((data.staleAverage * 100).toFixed(2));
     bot.telegram.sendMessage(
         channelId,
