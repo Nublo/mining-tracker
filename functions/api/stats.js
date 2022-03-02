@@ -74,7 +74,7 @@ exports.stats = functions.https.onRequest(async (req, res) => {
     };
     const jsonAnswer = {};
     jsonAnswer.computationParams = computationParams;
-    jsonAnswer.totalMined = total
+    jsonAnswer.totalMined = total;
     jsonAnswer.missed = {
         missed: missed,
         overmined: overmined
