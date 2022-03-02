@@ -50,12 +50,14 @@ exports.stats = functions.https.onRequest(async (req, res) => {
     const stats = [];
     let missed = 0;
     let overmined = 0;
+    let total = 0;
     events.forEach((doc) => {
         const entry = {};
         entry.date = doc.data().date.toDate().toDateString();
         entry.average = doc.data().average;
         entry.unpaid = doc.data().unpaid;
         entry.diff = doc.data().diff;
+        total += doc.data().diff;
         stats.push(entry);
 
         if (entry.average && entry.diff && entry.average < hashRate) {
@@ -72,6 +74,7 @@ exports.stats = functions.https.onRequest(async (req, res) => {
     };
     const jsonAnswer = {};
     jsonAnswer.computationParams = computationParams;
+    jsonAnswer.totalMined = total;
     jsonAnswer.missed = {
         missed: missed,
         overmined: overmined
